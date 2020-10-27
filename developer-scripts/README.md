@@ -108,9 +108,7 @@ If you having any problems with your environment, then you can run following com
 
 ```shell
 cd developer-scripts
-docker-compose stop
-docker rm `docker ps -qa`
-docker volume prune
+docker-compose -p emqx_edge_stack down
 ```
 
 *Please notice that command `docker rm docker ps -qa` will remove all of docker instances, if you have docker instances other than edge-stacks and do not want to have all of them removed, please remove edge stack instances one by one.*

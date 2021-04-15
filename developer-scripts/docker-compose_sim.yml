@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   security-bootstrapper:
-    image: sim:latest
+    image: sim:1
     container_name: manager-security
     hostname: manager-security
     volumes:

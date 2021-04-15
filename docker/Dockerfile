@@ -8,4 +8,6 @@ RUN go build -o main main.go
 
 EXPOSE 52200
 
+RUN chmod 755 etc && chmod 666 etc/*
+
 CMD ["./main"]

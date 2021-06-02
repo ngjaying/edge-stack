@@ -9,8 +9,8 @@ services:
   kuiper:
     image: emqx/kuiper:1.2.0-slim
     ports:
-      - "127.0.0.1:9081:9081"
-      - "127.0.0.1:20498:20498"
+      - "9081:9081"
+      - "20498:20498"
     container_name: manager-kuiper
     hostname: manager-kuiper
     environment:
@@ -18,19 +18,11 @@ services:
   edge:
     image: emqx/emqx-edge:latest
     ports:
-      - "127.0.0.1:8081:8081"
-      - "127.0.0.1:1883:1883"
-      - "127.0.0.1:18083:18083"
+      - "8081:8081"
+      - "1883:1883"
+      - "18083:18083"
     container_name: manager-edge
     hostname: manager-edge
-  neuron:
-    image: emqx/neuron:1.2.0
-    ports:
-      - "127.0.0.1:7681:7681"
-      - "127.0.0.1:1947:1947"
-      - "127.0.0.1:7000:7000"
-    container_name: manager-neuron
-    hostname: manager-neuron
   taos:
     image: tdengine/tdengine:2.0.3.1
     ports:

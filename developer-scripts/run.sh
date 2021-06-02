@@ -53,26 +53,16 @@ PingCheck () {
   HealthCheck "curl -L -s -o /dev/null -w %{http_code} $1"
 }
 
-## Init neuron
-echo "init neuron"
-NeuronCheck
-### Get uuid
-json=$(curl -s -X PUT -d "{\"func\":74,\"wtrm\":\"neruon\"}" $NEURON/funcno74 || { echo "Error: fail to add default neuron node";})
-nid=$(echo $json | sed "s/{.*\"uuid\":\"\([^\"]*\).*}/\1/g")
-echo "get neuron uuid $nid"
-
 ## Init Taos
 echo "init taos"
 ### Create DB
-docker exec manager-taos bash -c 'taos -s "create database db; use db; create table t (ts timestamp, temperature int, humidity int);"' || echo "Error: fail to create sample taos db"
+docker exec manager-taos bash -c 'taos -s "create database db; use db; create table t (ts timestamp, temperature int, humidity int); create table t (ts timestamp, temperature int, humidity int);"' || echo "Error: fail to create sample taos db"
 
 ## Init Kuiper
 echo "init kuiper"
 PingCheck $KUIPER/ping
 ### Add tdengine plugin
-#curl -d "{\"name\":\"tdengine\",\"file\":\"$TDENGINE_PLUGIN\",\"shellParas\": [\"2.0.3.1\"]}" $KUIPER/plugins/sinks || echo "Error: fail to add taos plugin to kuiper"
-### Create neuron stream
-curl -s -d "{\"sql\":\"CREATE STREAM neuron() WITH (DATASOURCE=\\\"Neuron/Telemetry/$nid\\\")\"}" $KUIPER/streams ||  echo "Error: fail to create stream"
+# curl -d "{\"name\":\"tdengine\",\"file\":\"$TDENGINE_PLUGIN\",\"shellParas\": [\"2.0.3.1\"]}" $KUIPER/plugins/sinks || echo "Error: fail to add taos plugin to kuiper"
 
 ## Init manager
 echo "init manager"
@@ -81,7 +71,6 @@ json=$(curl $MANAGER/login -sH "$JSONHEADER" -d '{"username":"admin","password":
 token=$(echo $json | sed "s/{.*\"token\":\"\([^\"]*\).*}/\1/g")
 ### Add nodes: neuron, edge, kuiper
 curl -s -d "{\"nodetype\":0, \"name\":\"local_kuiper\", \"endpoint\":\"$KUIPER_ENDPOINT\"}" -H "$JSONHEADER" -H "Authorization: $token" $MANAGER/kuiper/nodes || { echo "Error: fail to add default kuiper node";}
-curl -s -d "{\"nodetype\":0, \"name\":\"local_neuron\", \"endpoint\":\"$NEURON_ENDPOINT\", \"apiVersion\": 1}" -H "$JSONHEADER" -H "Authorization: $token"  $MANAGER/neuron/nodes || { echo "Error: fail to add default neuron node";}
 curl -s -d "{\"nodetype\":0, \"name\":\"local_edge\", \"endpoint\":\"$EDGE_ENDPOINT\", \"apiVersion\": 4,\"key\": \"admin\",\"secret\": \"public\"}" -H "$JSONHEADER" -H "Authorization: $token"  $MANAGER/edge/nodes || { echo "Error: fail to add default edge node";}
 
 ## Init Grafana
